@@ -1,4 +1,3 @@
-from copy import copy
 from IntCode import IntCodeComputer
 
 with open("day2_input.txt") as file:
