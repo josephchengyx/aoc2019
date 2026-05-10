@@ -38,5 +38,5 @@ class IntCodeComputer:
                 case 99:
                     break
                 case _:
-                    raise ValueError("Invalid opcode")
+                    raise ValueError(f"Unknown opcode {opcode}")
             pointer += 4

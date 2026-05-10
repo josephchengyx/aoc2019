@@ -125,4 +125,4 @@ class IntCodeComputer:
                 case 99:  # halt
                     break
                 case _:
-                    raise ValueError("Invalid opcode")
+                    raise ValueError(f"Unknown opcode {instruction}")
