@@ -107,7 +107,7 @@ class IntCodeComputer:
                     else:
                         memory_pointer += 3
                 case 7:  # less than
-                    param1, param2, param3 = self.read_memory(range(memory_pointer + 1, memory_pointer + 4))
+                    param1, param2, param3 = self.read_memory(range(memory_pointer+1, memory_pointer+4))
                     mode1, mode2 = param_modes
                     if self.read_param(param1, mode1) < self.read_param(param2, mode2):
                         self.set_memory(param3, 1)
@@ -115,7 +115,7 @@ class IntCodeComputer:
                         self.set_memory(param3, 0)
                     memory_pointer += 4
                 case 8:  # equals
-                    param1, param2, param3 = self.read_memory(range(memory_pointer + 1, memory_pointer + 4))
+                    param1, param2, param3 = self.read_memory(range(memory_pointer+1, memory_pointer+4))
                     mode1, mode2 = param_modes
                     if self.read_param(param1, mode1) == self.read_param(param2, mode2):
                         self.set_memory(param3, 1)
