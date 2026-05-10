@@ -1,6 +1,6 @@
 from day05.IntCode import IntCodeComputer
 from itertools import permutations
-from typing import Iterable, Sequence, Callable
+from typing import Iterable, Callable
 
 with open("day7_input.txt") as file:
     data = list(map(int, file.read().split(',')))
