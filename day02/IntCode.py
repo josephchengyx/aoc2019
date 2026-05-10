@@ -12,7 +12,7 @@ class IntCodeComputer:
         if isinstance(address, int):
             self.memory[address] = value
         else:
-            assert len(address) == len(value)
+            assert len(address) == len(value), "Address and value must have same number of elements"
             for addr, val in zip(address, value):
                 self.memory[addr] = val
 
@@ -37,4 +37,6 @@ class IntCodeComputer:
                     self.set_memory(param3, value)
                 case 99:
                     break
+                case _:
+                    raise ValueError("Invalid opcode")
             pointer += 4

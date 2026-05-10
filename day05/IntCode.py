@@ -14,7 +14,7 @@ class IntCodeComputer:
         if isinstance(address, int):
             self.memory[address] = value
         else:
-            assert len(address) == len(value)
+            assert len(address) == len(value), "Address and value must have same number of elements"
             for addr, val in zip(address, value):
                 self.memory[addr] = val
 
@@ -46,9 +46,9 @@ class IntCodeComputer:
         return self.output
 
     @staticmethod
-    def parse_opcode(opcode: int) -> tuple[int, list[int] | None]:
+    def parse_opcode(opcode: int) -> tuple[int, list[int]]:
         instruction = opcode % 100
-        param_modes = None
+        param_modes = list()  # list[int]
         match instruction:
             case 1 | 2 | 5 | 6 | 7 | 8:  # add, multiply, jump-if-true, jump-if-false, less than, equals
                 param_modes = [(opcode // 100) % 10, (opcode // 1000) % 10]
@@ -124,3 +124,5 @@ class IntCodeComputer:
                     memory_pointer += 4
                 case 99:  # halt
                     break
+                case _:
+                    raise ValueError("Invalid opcode")
