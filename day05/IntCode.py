@@ -48,7 +48,7 @@ class IntCodeComputer:
     @staticmethod
     def parse_opcode(opcode: int) -> tuple[int, list[int]]:
         instruction = opcode % 100
-        param_modes = list()  # list[int]
+        param_modes: list[int] = list()
         match instruction:
             case 1 | 2 | 5 | 6 | 7 | 8:  # add, multiply, jump-if-true, jump-if-false, less than, equals
                 param_modes = [(opcode // 100) % 10, (opcode // 1000) % 10]
