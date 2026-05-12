@@ -2,6 +2,7 @@ from typing import Sequence, Callable, Any
 from numpy.typing import NDArray
 from collections import Counter
 import numpy as np
+import matplotlib.pyplot as plt
 
 with open("day8_input.txt") as file:
     data = list(map(int, list(file.read().rstrip())))
@@ -28,31 +29,37 @@ def part1(image: NDArray[np.int_]) -> int:
     twos_digit_count = digit_counts_per_layer[least_zeros_layer_idx][2]
     return ones_digit_count * twos_digit_count
 
-def part2(image: NDArray[np.int_]) -> str:
+def render_image_as_string(image: NDArray[np.int_], separator: str = ' ') -> str:
+    def render_pixel(value: int) -> str:
+        return {0: '.', 1: '#'}.get(value, ' ')
+
+    def image_array_to_string(image: NDArray[np.int_]) -> str:
+        if image.dtype != object and image.dtype.kind != 'U': image = image.astype(str)
+        return '\n'.join(separator.join(row) for row in image)
+
+    rendered_image = np.vectorize(render_pixel)(image)
+    return image_array_to_string(rendered_image)
+
+def part2(image: NDArray[np.int_]) -> NDArray[np.int_]:
     def decode_pixel(h: int, w: int) -> int:
         l = 0
         while image[h, w, l] == 2:
             l += 1
         return image[h, w, l].item()
 
-    def render_pixel(value: int) -> str:
-        return {0: '.', 1: '#'}.get(value, ' ')
-
-    def image_array_to_string(image: NDArray[np.int_]) -> str:
-        if image.dtype != object and image.dtype.kind != 'U': image = image.astype(str)
-        return '\n'.join(' '.join(row) for row in image)
-
     decoded_image = np.empty_like(image[..., 0])
     for h, w in np.ndindex(decoded_image.shape):
         decoded_image[h, w] = decode_pixel(h, w)
-    rendered_image = np.vectorize(render_pixel)(decoded_image)
-    return image_array_to_string(rendered_image)
+    return decoded_image
 
 image = process_image_data(data, image_dimensions)
 print(f"Part 1: {part1(image)}")
 
-rendered_image = part2(image)
-print(f"Part 2:\n{rendered_image}")
+decoded_image = part2(image)
+print(f"Part 2:\n{render_image_as_string(decoded_image)}")
 
-with open("day8_output.txt", "w") as file:
-    file.write(rendered_image)
+plt.figure(figsize=image_dimensions)
+plt.imshow(decoded_image, cmap='gray_r')
+plt.axis('off')
+plt.savefig("day8_output.png")
+plt.close()
