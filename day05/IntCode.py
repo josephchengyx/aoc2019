@@ -21,13 +21,14 @@ class IntCodeComputer:
 
     def configure_settings(self, **kwargs: Any) -> None:
         for setting, value in kwargs.items():
-            if setting in self._settings:
-                expected_type = self._settings.get(setting)
-                if not isinstance(value, expected_type):
-                    raise TypeError(
-                        f"{setting} must be of type {expected_type.__name__}, got {type(value).__name__} instead"
-                    )
-                setattr(self, f"_{setting}", value)
+            if setting not in self._settings:
+                raise KeyError(f"{setting} does not exist in settings")
+            expected_type = self._settings.get(setting)
+            if not isinstance(value, expected_type):
+                raise TypeError(
+                    f"{setting} must be of type {expected_type.__name__}, got {type(value).__name__} instead"
+                )
+            setattr(self, f"_{setting}", value)
 
     def read_program(self, program: list[int]) -> None:
         self._memory = copy(program)
