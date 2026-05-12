@@ -58,7 +58,7 @@ class IntCodeComputer:
         self._output = deque()
 
     def _get_from_address(self, address: int) -> int:
-        if address < 0: raise RuntimeError(f"Cannot read from invalid address {address}")
+        if address < 0: raise IndexError(f"Cannot read from invalid address {address}")
         elif address < len(self._memory):
             return self._memory[address]
         else:
@@ -71,7 +71,7 @@ class IntCodeComputer:
             return [self._get_from_address(addr) for addr in address]
 
     def _put_at_address(self, address: int, value: int) -> None:
-        if address < 0: raise RuntimeError(f"Cannot write to invalid address {address}")
+        if address < 0: raise IndexError(f"Cannot write to invalid address {address}")
         elif address < len(self._memory):
             self._memory[address] = value
         else:
