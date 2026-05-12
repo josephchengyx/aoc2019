@@ -22,11 +22,11 @@ def part1(data: list[int]) -> int:
     def amplify_signal(setting: tuple[int, ...]) -> int:
         signal = 0
         for amp_setting in setting:
-            amplifier.read_program(data)
+            amplifier.load_program(data)
             amplifier.put_input([amp_setting, signal])
             amplifier.run()
             signal = amplifier.get_output().pop()
-            amplifier.clear_io()
+            amplifier.reset()
         return signal
 
     amplifier = IntCodeComputer()
@@ -38,7 +38,7 @@ def part2(data: list[int]) -> int:
         signal = 0
         for amplifier, amp_setting in zip(amplifiers, setting):
             amplifier.configure_settings(await_further_input=True)
-            amplifier.read_program(data)
+            amplifier.load_program(data)
             amplifier.put_input(amp_setting)
         for passes in range(max_passes):
             for i, amplifier in enumerate(amplifiers):
@@ -48,7 +48,7 @@ def part2(data: list[int]) -> int:
             if all(amplifier.is_done() for amplifier in amplifiers):
                 break
         for amplifier in amplifiers:
-            amplifier.clear_io()
+            amplifier.reset()
         return signal
 
     amplifiers = [IntCodeComputer() for _ in range(5)]

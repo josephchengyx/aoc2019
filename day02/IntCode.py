@@ -5,7 +5,7 @@ class IntCodeComputer:
     def __init__(self) -> None:
         self.memory: list[int] = list()
 
-    def read_program(self, program: list[int]) -> None:
+    def load_program(self, program: list[int]) -> None:
         self.memory = copy(program)
 
     def set_memory(self, address: int | Sequence[int], value: int | Sequence[int]) -> None:

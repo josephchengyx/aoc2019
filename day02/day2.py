@@ -5,7 +5,7 @@ with open("day2_input.txt") as file:
 
 def part1(data: list[int]) -> int:
     computer = IntCodeComputer()
-    computer.read_program(data)
+    computer.load_program(data)
     computer.set_memory([1, 2], [12, 2])
     computer.run()
     return computer.read_memory(0)
@@ -14,7 +14,7 @@ def part2(data: list[int], target: int) -> int:
     computer = IntCodeComputer()
     for noun in range(99):
         for verb in range(99):
-            computer.read_program(data)
+            computer.load_program(data)
             computer.set_memory([1, 2], [noun, verb])
             computer.run()
             result = computer.read_memory(0)
