@@ -188,22 +188,16 @@ class IntCodeComputer:
                 case 7:  # less than
                     param1, param2, param3 = self._read_memory(range(self._pointer + 1, self._pointer + 4))
                     mode1, mode2, mode3 = param_modes
-                    value1, value2 = self._read_value(param1, mode1), self._read_value(param2, mode2)
+                    value = 1 if self._read_value(param1, mode1) < self._read_value(param2, mode2) else 0
                     address = self._read_address(param3, mode3)
-                    if value1 < value2:
-                        self._write_memory(address, 1)
-                    else:
-                        self._write_memory(address, 0)
+                    self._write_memory(address, value)
                     self._pointer += 4
                 case 8:  # equals
                     param1, param2, param3 = self._read_memory(range(self._pointer + 1, self._pointer + 4))
                     mode1, mode2, mode3 = param_modes
-                    value1, value2 = self._read_value(param1, mode1), self._read_value(param2, mode2)
+                    value = 1 if self._read_value(param1, mode1) == self._read_value(param2, mode2) else 0
                     address = self._read_address(param3, mode3)
-                    if value1 == value2:
-                        self._write_memory(address, 1)
-                    else:
-                        self._write_memory(address, 0)
+                    self._write_memory(address, value)
                     self._pointer += 4
                 case 9:  # relative base offset
                     param = self._read_memory(self._pointer + 1)
