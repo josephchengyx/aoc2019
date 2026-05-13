@@ -1,4 +1,4 @@
-from day02.IntCode import IntCodeComputer
+from IntCode.v1 import IntCodeComputer
 
 with open("day2_input.txt") as file:
     data = list(map(int, file.read().split(',')))

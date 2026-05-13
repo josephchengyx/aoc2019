@@ -1,4 +1,4 @@
-from day05.IntCode import IntCodeComputer
+from IntCode.v2 import IntCodeComputer
 from itertools import permutations
 from typing import Iterable, Callable
 

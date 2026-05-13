@@ -1,7 +1,9 @@
-from typing import Sequence
+from typing import Sequence, Final
 from copy import copy
 
 class IntCodeComputer:
+    version: Final[int] = 1
+
     def __init__(self) -> None:
         self.memory: list[int] = list()
 
