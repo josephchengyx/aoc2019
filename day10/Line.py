@@ -38,9 +38,6 @@ class Coordinate2D:
     def zero() -> Coordinate2D:
         return Coordinate2D(0, 0)
 
-    def as_tuple(self) -> tuple[int, int]:
-        return self.x, self.y
-
 
 @dataclass
 class Line2D:
