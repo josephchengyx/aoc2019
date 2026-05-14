@@ -41,6 +41,7 @@ class TreeNode:
             curr_node = curr_node.parent
         return curr_node
 
+
 class Tree:
     def __init__(self):
         self._nodes: dict[str, TreeNode] = dict()
