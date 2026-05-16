@@ -1,7 +1,7 @@
 from __future__ import annotations
 from collections.abc import Iterator
 from dataclasses import dataclass
-from typing import Final
+from typing import Final, Sequence
 from math import gcd, atan2, degrees
 
 @dataclass(unsafe_hash=True)
@@ -35,6 +35,11 @@ class Vector2D:
 
     def det(self, other: Vector2D) -> int:
         return self.x * other.y - self.y * other.x
+
+    def transform(self, matrix: Sequence[Sequence[int]]) -> Vector2D:
+        assert len(matrix) == 2 and len(matrix[0]) == 2 and len(matrix[1]) == 2, \
+        "Matrix must be of shape (2, 2)"
+        return Vector2D(*[self.dot(Vector2D(*row)) for row in matrix])
 
     def __iter__(self) -> Iterator[int]:
         yield self.x
