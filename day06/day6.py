@@ -1,8 +1,5 @@
 from Tree import Tree
 
-with open("day6_input.txt") as file:
-    data = list(map(lambda line: line.rstrip(), file.readlines()))
-
 def read_orbit_map(data: list[str]) -> Tree:
     orbit_map = Tree()
     for orbit in data:
@@ -22,6 +19,10 @@ def part2(orbit_map: Tree, start: str, end: str) -> int:
     path_from_end = orbit_map.path_to_node(end, nearest_common_ancestor)
     return len(path_from_start[1:]) + len(path_from_end[1:])
 
-orbit_map = read_orbit_map(data)
-print(f"Part 1: {part1(orbit_map)}")
-print(f"Part 2: {part2(orbit_map, "YOU", "SAN")}")
+if __name__ == "__main__":
+    with open("day6_input.txt") as file:
+        data = list(map(lambda line: line.rstrip(), file.readlines()))
+
+    orbit_map = read_orbit_map(data)
+    print(f"Part 1: {part1(orbit_map)}")
+    print(f"Part 2: {part2(orbit_map, "YOU", "SAN")}")

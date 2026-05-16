@@ -1,6 +1,3 @@
-with open("day1_input.txt") as file:
-    data = list(map(int, file.readlines()))
-
 def fuel_requirement(mass: int) -> int:
     return max(mass // 3 - 2, 0)
 
@@ -17,5 +14,9 @@ def part2(data: list[int]) -> int:
             total += added_fuel
     return total
 
-print(f"Part 1: {part1(data)}")
-print(f"Part 2: {part2(data)}")
+if __name__ == "__main__":
+    with open("day1_input.txt") as file:
+        data = list(map(int, file.readlines()))
+
+    print(f"Part 1: {part1(data)}")
+    print(f"Part 2: {part2(data)}")

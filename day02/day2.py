@@ -1,8 +1,5 @@
 from IntCode.v1 import IntCodeComputer
 
-with open("day2_input.txt") as file:
-    data = list(map(int, file.read().split(',')))
-
 def part1(data: list[int]) -> int:
     computer = IntCodeComputer()
     computer.load_program(data)
@@ -22,5 +19,9 @@ def part2(data: list[int], target: int) -> int:
                 return 100 * noun + verb
     return -1  # should not reach here, this is bad
 
-print(f"Part 1: {part1(data)}")
-print(f"Part 2: {part2(data, 19690720)}")
+if __name__ == "__main__":
+    with open("day2_input.txt") as file:
+        data = list(map(int, file.read().split(',')))
+
+    print(f"Part 1: {part1(data)}")
+    print(f"Part 2: {part2(data, 19690720)}")

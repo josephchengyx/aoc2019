@@ -2,9 +2,6 @@ from IntCode.v2 import IntCodeComputer
 from itertools import permutations
 from typing import Iterable, Callable
 
-with open("day7_input.txt") as file:
-    data = list(map(int, file.read().split(',')))
-
 def find_max_thruster_signal(
         phase_settings: Iterable[tuple[int, ...]],
         amplify_signal: Callable[[tuple[int, ...]], int]
@@ -55,5 +52,9 @@ def part2(data: list[int]) -> int:
     phase_settings = permutations(list(range(5, 9 + 1)))
     return find_max_thruster_signal(phase_settings, amplify_signal)
 
-print(f"Part 1: {part1(data)}")
-print(f"Part 2: {part2(data)}")
+if __name__ == "__main__":
+    with open("day7_input.txt") as file:
+        data = list(map(int, file.read().split(',')))
+
+    print(f"Part 1: {part1(data)}")
+    print(f"Part 2: {part2(data)}")

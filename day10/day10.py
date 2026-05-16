@@ -1,9 +1,6 @@
 from Vector import Vector2D
 from typing import Any
 
-with open("day10_input.txt") as file:
-    data = list(map(lambda line: line.rstrip(), file.readlines()))
-
 def read_asteroid_map(data: list[str]) -> set[Vector2D]:
     asteroids: set[Vector2D] = set()
     x_max, y_max = len(data[0]), len(data)
@@ -56,7 +53,11 @@ def part2(station: Vector2D, asteroid_map: set[Vector2D]) -> int:
     asteroid_200 = laser_orientations[200-1]
     return asteroid_200.x * 100 + asteroid_200.y
 
-asteroid_map = read_asteroid_map(data)
-station, visibility_score = part1(asteroid_map)
-print(f"Part 1: {visibility_score}")
-print(f"Part 2: {part2(station, asteroid_map)}")
+if __name__ == "__main__":
+    with open("day10_input.txt") as file:
+        data = list(map(lambda line: line.rstrip(), file.readlines()))
+
+    asteroid_map = read_asteroid_map(data)
+    station, visibility_score = part1(asteroid_map)
+    print(f"Part 1: {visibility_score}")
+    print(f"Part 2: {part2(station, asteroid_map)}")

@@ -1,8 +1,6 @@
 from typing import Callable
 import re
 
-number_range = range(123257, 647015+1)
-
 def has_repeated_digits(number: int) -> bool:
     repeat_groups = [match.group() for match in re.finditer(r"(\d)\1+", str(number))]
     return len(repeat_groups) > 0
@@ -29,5 +27,7 @@ def count_acceptable_numbers(number_range: list[int] | range, criteria: Callable
             acceptable_numbers += 1
     return acceptable_numbers
 
-print(f"Part 1: {count_acceptable_numbers(number_range, part1_criteria)}")
-print(f"Part 2: {count_acceptable_numbers(number_range, part2_criteria)}")
+if __name__ == "__main__":
+    number_range = range(123257, 647015 + 1)
+    print(f"Part 1: {count_acceptable_numbers(number_range, part1_criteria)}")
+    print(f"Part 2: {count_acceptable_numbers(number_range, part2_criteria)}")

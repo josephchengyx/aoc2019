@@ -4,11 +4,6 @@ from collections import Counter
 import numpy as np
 import matplotlib.pyplot as plt
 
-with open("day8_input.txt") as file:
-    data = list(map(int, list(file.read().rstrip())))
-
-image_dimensions = (25, 6)  # (width, height)
-
 def process_image_data(data: list[int], image_dimensions: tuple[int, int]) -> NDArray[np.int_]:
     # output dimensions: (height, width, layers)
     return np.array(data).reshape(image_dimensions + (-1,), order='F').transpose((1, 0, 2))
@@ -52,14 +47,19 @@ def part2(image: NDArray[np.int_]) -> NDArray[np.int_]:
         decoded_image[h, w] = decode_pixel(h, w)
     return decoded_image
 
-image = process_image_data(data, image_dimensions)
-print(f"Part 1: {part1(image)}")
+if __name__ == "__main__":
+    with open("day8_input.txt") as file:
+        data = list(map(int, list(file.read().rstrip())))
 
-decoded_image = part2(image)
-print(f"Part 2:\n{render_image_as_string(decoded_image)}")
+    image_dimensions = (25, 6)  # (width, height)
+    image = process_image_data(data, image_dimensions)
+    print(f"Part 1: {part1(image)}")
 
-plt.figure(figsize=image_dimensions)
-plt.imshow(decoded_image, cmap='gray_r')
-plt.axis('off')
-plt.savefig("day8_output.png", bbox_inches='tight')
-plt.close()
+    decoded_image = part2(image)
+    print(f"Part 2:\n{render_image_as_string(decoded_image)}")
+
+    plt.figure(figsize=image_dimensions)
+    plt.imshow(decoded_image, cmap='gray_r')
+    plt.axis('off')
+    plt.savefig("day8_output.png", bbox_inches='tight')
+    plt.close()
