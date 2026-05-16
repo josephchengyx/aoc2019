@@ -19,9 +19,9 @@ def paint_hull(data: list[int], hull_paint: dict[Vector2D, int], max_iters: int 
             break
     return hull_paint
 
-def hull_painting_to_image_array(hull_paint: dict[Vector2D, int], padding: int = 0) -> NDArray[np.int_]:
+def image_dict_to_image_array(image_dict: dict[Vector2D, int], padding: int = 0) -> NDArray[np.int_]:
     def get_coordinate_range() -> tuple[int, int, int, int]:
-        coordinates: list[Vector2D] = list(hull_paint.keys())
+        coordinates: list[Vector2D] = list(image_dict.keys())
         x_coordinates: list[int] = list(map(lambda coord: coord.x, coordinates))
         y_coordinates: list[int] = list(map(lambda coord: coord.y, coordinates))
         x_min, x_max = min(x_coordinates) - padding, max(x_coordinates) + padding
@@ -30,7 +30,7 @@ def hull_painting_to_image_array(hull_paint: dict[Vector2D, int], padding: int =
 
     x_min, x_max, y_min, y_max = get_coordinate_range()
     image = np.zeros((y_max-y_min+1, x_max-x_min+1), dtype=np.int_)
-    for coordinate, colour in hull_paint.items():
+    for coordinate, colour in image_dict.items():
         x, y = coordinate.x - x_min, coordinate.y - y_min
         image[y, x] = colour
     return np.flipud(image).astype(np.int_)
@@ -40,7 +40,7 @@ if __name__ == "__main__":
         data = list(map(int, file.read().split(',')))
 
     painted_hull_part1 = paint_hull(data, dict())
-    painted_hull_part2 = hull_painting_to_image_array(paint_hull(data, {Vector2D.zero(): 1}))
+    painted_hull_part2 = image_dict_to_image_array(paint_hull(data, {Vector2D.zero(): 1}))
     print(f"Part 1: {len(painted_hull_part1.keys())}")
     print(f"Part 2:\n{render_image_as_string(painted_hull_part2)}")
 
