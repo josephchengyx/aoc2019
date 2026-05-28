@@ -37,7 +37,7 @@ class Vector2D:
         return self.x * other.y - self.y * other.x
 
     def transform(self, matrix: Sequence[Sequence[int]]) -> Vector2D:
-        assert len(matrix) == 2 and len(matrix[0]) == 2 and len(matrix[1]) == 2, \
+        assert len(matrix) == 2 and all(len(row) == 2 for row in matrix), \
         "Matrix must be of shape (2, 2)"
         return Vector2D(*[self.dot(Vector2D(*row)) for row in matrix])
 
@@ -59,4 +59,4 @@ class Vector2D:
     def squared_euclidean_distance(self, other: Vector2D | None = None) -> int:
         if other is None:
             other = Vector2D.zero()
-        return (self.x - other.x) ** 2 + (self.y - other.y) ** 2
+        return (self - other).dot(self - other)
