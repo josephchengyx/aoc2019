@@ -1,5 +1,5 @@
 from IntCode.v3 import IntCodeComputer
-from day10.Vector import Vector2D
+from day10.Vector2D import Vector2D
 from typing import Final
 
 class Robot:

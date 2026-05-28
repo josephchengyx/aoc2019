@@ -1,4 +1,4 @@
-from Vector import Vector2D
+from Vector2D import Vector2D
 from typing import Any
 
 def read_asteroid_map(data: list[str]) -> set[Vector2D]:

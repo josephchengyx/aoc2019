@@ -2,6 +2,7 @@ from __future__ import annotations
 from collections.abc import Iterator
 from dataclasses import dataclass
 from typing import Final, Sequence
+from math import sqrt
 import re
 
 @dataclass(unsafe_hash=True)
@@ -53,21 +54,23 @@ class Vector3D:
         def parse(field: str) -> float | int:
             value = float(re.search(rf"{field}=(-?\d+\.?\d*)", string).group(1))
             return int(value) if value.is_integer() else value
-        return Vector3D(*[parse(coordinate) for coordinate in 'xyz'])
+        return Vector3D(*[parse(coordinate) for coordinate in "xyz"])
 
     def norm(self) -> float:
-        return self.dot(self)
+        return sqrt(self.dot(self))
 
     def normalize(self) -> Vector3D:
         return self / self.norm()
 
-    def compare(self, other: Vector3D) -> Vector3D:
-        def compare_coordinate(coordinate1: float, coordinate2: float) -> int:
-            return int(coordinate1 < coordinate2) - int(coordinate1 > coordinate2)
+    @staticmethod
+    def sgn_of_difference_scalar(coordinate1: float, coordinate2: float) -> int:
+        return int(coordinate1 < coordinate2) - int(coordinate1 > coordinate2)
+
+    def sgn_of_difference(self, other: Vector3D) -> Vector3D:
         return Vector3D(
-            compare_coordinate(self.x, other.x),
-            compare_coordinate(self.y, other.y),
-            compare_coordinate(self.z, other.z)
+            Vector3D.sgn_of_difference_scalar(self.x, other.x),
+            Vector3D.sgn_of_difference_scalar(self.y, other.y),
+            Vector3D.sgn_of_difference_scalar(self.z, other.z)
         )
 
     def energy(self) -> float:

@@ -1,4 +1,4 @@
-from day10.Vector import Vector2D
+from day10.Vector2D import Vector2D
 from Robot import Robot
 from day08.day8 import render_image_as_string
 from numpy.typing import NDArray
