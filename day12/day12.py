@@ -41,11 +41,11 @@ def part2(data: list[str], max_iters: int = 1_000_000) -> int:
         moon_positions: list[int] = [getattr(moon, axis) for moon in initial_moon_positions]
         moon_velocities: list[int] = [0 for moon in initial_moon_positions]
 
-        for t in range(1, max_iters):
+        for time in range(1, max_iters):
             moon_positions, moon_velocities = simulate_dynamics(
                 moon_positions, moon_velocities, lambda x, y: Vector3D.sgn_of_difference_scalar(x, y), 1)
             if all(velocity == 0 for velocity in moon_velocities):
-                cycle_lengths[i] = 2 * t
+                cycle_lengths[i] = 2 * time
                 break
 
     return lcm(*cycle_lengths)
