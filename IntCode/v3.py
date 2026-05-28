@@ -113,7 +113,7 @@ class IntCodeComputer:
             # position mode
             case 0: return self._read_memory(param)
             # immediate mode
-            case 1:  return param
+            case 1: return param
             # relative mode
             case 2: return self._read_memory(param + self._relative_base)
             case _: raise ValueError(f"Unknown parameter mode {mode} for read operation")
