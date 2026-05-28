@@ -50,13 +50,25 @@ class Vector3D:
 
     @staticmethod
     def from_string(string: str) -> Vector3D:
-        x = re.search(r"x=(-?\d+\.?\d*)", string).group(1)
-        y = re.search(r"y=(-?\d+\.?\d*)", string).group(1)
-        z = re.search(r"z=(-?\d+\.?\d*)", string).group(1)
-        return Vector3D(x, y, z)
+        def parse(field: str) -> float | int:
+            value = float(re.search(rf"{field}=(-?\d+\.?\d*)", string).group(1))
+            return int(value) if value.is_integer() else value
+        return Vector3D(*[parse(coordinate) for coordinate in 'xyz'])
 
     def norm(self) -> float:
         return self.dot(self)
 
     def normalize(self) -> Vector3D:
         return self / self.norm()
+
+    def compare(self, other: Vector3D) -> Vector3D:
+        def compare_coordinate(coordinate1: float, coordinate2: float) -> int:
+            return int(coordinate1 < coordinate2) - int(coordinate1 > coordinate2)
+        return Vector3D(
+            compare_coordinate(self.x, other.x),
+            compare_coordinate(self.y, other.y),
+            compare_coordinate(self.z, other.z)
+        )
+
+    def energy(self) -> float:
+        return sum(abs(coordinate) for coordinate in self)
