@@ -31,15 +31,17 @@ class Robot:
     def scan_panel(self, colour: int) -> None:
         self._computer.put_input(colour)
 
-    def step(self) -> int:
-        self._computer.run()
-        colour = self._computer.get_output().pop()
-        self._computer.run()
-        turn_direction = self._computer.get_output().pop()
-        self._turn(turn_direction)
-        self._move()
+    def step(self) -> int | None:
+        for _ in range(2):
+            self._computer.run()
         self._done = self._computer.is_done()
-        return colour
+        if self._done:
+            return None
+        else:
+            colour, turn_direction = self._computer.read_output()
+            self._turn(turn_direction)
+            self._move()
+            return colour
 
     def is_done(self) -> bool:
         return self._done

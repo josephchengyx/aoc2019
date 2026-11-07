@@ -1,11 +1,11 @@
-from typing import Sequence, Any, Final
+from typing import Sequence, Any, Optional, Final
 from collections import deque
 from copy import copy
 
 class IntCodeComputer:
     version: Final[int] = 3
-    _settings: dict[str, type] = {"pause_on_output": bool, "await_further_input": bool}
-    _num_params_per_opcode: dict[int, int] = {1: 3, 2: 3, 3: 1, 4: 1, 5: 2, 6: 2, 7: 3, 8: 3, 9: 1, 99: 0}
+    _settings: Final[dict[str, type]] = {"pause_on_output": bool, "await_further_input": bool}
+    _num_params_per_opcode: Final[dict[int, int]] = {1: 3, 2: 3, 3: 1, 4: 1, 5: 2, 6: 2, 7: 3, 8: 3, 9: 1, 99: 0}
 
     def __init__(self) -> None:
         # Internal states
@@ -15,7 +15,7 @@ class IntCodeComputer:
         self._relative_base: int = 0
         self._done: bool = False
         self._input: deque[int] = deque()
-        self._output: deque[int] = deque()
+        self._output: list[int] = list()
         # User settings
         self._pause_on_output: bool = False
         self._await_further_input: bool = False
@@ -43,8 +43,17 @@ class IntCodeComputer:
         else:
             self._input.extend(value)
 
-    def get_output(self) -> list[int]:
-        return list(self._output)
+    def read_output(self, num_items: Optional[int] = None) -> list[int]:
+        if num_items is None:
+            output = self._output
+            self._output = list()
+            return output
+        else:
+            if not isinstance(num_items, int) or num_items <= 0:
+                raise ValueError(f"Cannot read non-positive, non-integer number of items")
+            output = self._output[:num_items]
+            self._output = self._output[num_items:]
+            return output
 
     def is_done(self) -> bool:
         return self._done
@@ -56,7 +65,7 @@ class IntCodeComputer:
         self._relative_base = 0
         self._done = False
         self._input = deque()
-        self._output = deque()
+        self._output = list()
 
     def _get_from_address(self, address: int) -> int:
         if address < 0: raise IndexError(f"Cannot read from invalid address {address}")

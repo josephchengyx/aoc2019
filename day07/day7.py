@@ -22,7 +22,7 @@ def part1(data: list[int]) -> int:
             amplifier.load_program(data)
             amplifier.put_input([amp_setting, signal])
             amplifier.run()
-            signal = amplifier.get_output().pop()
+            signal = amplifier.read_output().pop()
             amplifier.reset()
         return signal
 
@@ -41,7 +41,7 @@ def part2(data: list[int]) -> int:
             for i, amplifier in enumerate(amplifiers):
                 amplifier.put_input(signal)
                 amplifier.run()
-                signal = amplifier.get_output().pop()
+                signal = amplifier.read_output().pop()
             if all(amplifier.is_done() for amplifier in amplifiers):
                 break
         for amplifier in amplifiers:

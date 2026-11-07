@@ -13,7 +13,8 @@ def paint_hull(data: list[int], hull_paint: dict[Vector2D, int], max_iters: int 
         panel_colour = hull_paint.get(current_position, 0)
         robot.scan_panel(panel_colour)
         panel_colour = robot.step()
-        hull_paint[current_position] = panel_colour
+        if panel_colour is not None:
+            hull_paint[current_position] = panel_colour
         current_position = robot.get_position()
         if robot.is_done():
             break

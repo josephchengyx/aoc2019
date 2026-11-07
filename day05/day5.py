@@ -5,7 +5,7 @@ def run_diagnostic_program(data: list[int], input_value: int) -> list[int]:
     computer.load_program(data)
     computer.put_input(input_value)
     computer.run()
-    return computer.get_output()
+    return computer.read_output()
 
 if __name__ == "__main__":
     with open("day5_input.txt") as file:
