@@ -103,7 +103,7 @@ class Cabinet:
 
     def draw_screen(self) -> str:
         screen = self._get_screen()
-        return '\n'.join([' '.join(row) for row in screen])
+        return '\n'.join(' '.join(row) for row in screen)
 
 
 class InteractiveCabinet(Cabinet):
