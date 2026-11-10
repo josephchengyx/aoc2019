@@ -1,12 +1,11 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Final
 import re
 
-@dataclass
+@dataclass(frozen=True)
 class Coordinate2D:
-    x: Final[int]
-    y: Final[int]
+    x: int
+    y: int
 
     def __repr__(self) -> str:
         return f"({self.x},{self.y})"
@@ -46,10 +45,10 @@ class Coordinate2D:
         return abs(self.x - other.x) + abs(self.y - other.y)
 
 
-@dataclass
+@dataclass(frozen=True)
 class Line2D:
-    start: Final[Coordinate2D]
-    end: Final[Coordinate2D]
+    start: Coordinate2D
+    end: Coordinate2D
 
     def __repr__(self) -> str:
         return f"{self.start}-{self.end}"

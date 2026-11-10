@@ -1,15 +1,15 @@
 from __future__ import annotations
 from collections.abc import Iterator
 from dataclasses import dataclass
-from typing import Final, Sequence
+from typing import Sequence
 from math import sqrt
 import re
 
-@dataclass(unsafe_hash=True)
+@dataclass(frozen=True)
 class Vector3D:
-    x: Final[float]
-    y: Final[float]
-    z: Final[float]
+    x: float
+    y: float
+    z: float
 
     def __repr__(self) -> str:
         return f"({self.x},{self.y},{self.z})"

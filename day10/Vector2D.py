@@ -1,13 +1,13 @@
 from __future__ import annotations
 from collections.abc import Iterator
 from dataclasses import dataclass
-from typing import Final, Sequence
+from typing import Sequence
 from math import gcd, atan2, degrees
 
-@dataclass(unsafe_hash=True)
+@dataclass(frozen=True)
 class Vector2D:
-    x: Final[int]
-    y: Final[int]
+    x: int
+    y: int
 
     def __repr__(self) -> str:
         return f"({self.x},{self.y})"
