@@ -12,52 +12,57 @@ class Material:
     ORE: ClassVar[str] = "ORE"
     FUEL: ClassVar[str] = "FUEL"
 
+    @classmethod
+    def empty(cls, name: str) -> Material:
+        return cls(name, 0)
+
     def __repr__(self) -> str:
         return f"{self.qty} {self.name}"
 
-    def same_as(self, other: str | Material) -> bool:
-        if isinstance(other, str):
-            return self.name == other
-        elif isinstance(other, Material):
-            return self.name == other.name
-        else:
-            return False
+    def __neg__(self) -> Material:
+        return Material(self.name, -self.qty)
+
+    def __add__(self, other: Material) -> Material:
+        return Material(self.name, self.qty + other.qty)
+
+    def __sub__(self, other: Material) -> Material:
+        return self.__add__(other.__neg__())
+
+    def __mul__(self, ratio: int) -> Material:
+        return Material(self.name, self.qty * ratio)
+
+    def __rmul__(self, ratio: int) -> Material:
+        return self.__mul__(ratio)
 
     def is_empty(self) -> bool:
         return self.qty == 0
 
     def needs_production(self) -> bool:
-        return self.qty < 0
-
-    def combine(self, other: Material) -> Material | None:
-        if isinstance(other, Material) and self.same_as(other):
-            return Material(self.name, self.qty + other.qty)
+        if self.name == Material.ORE:
+            return False
         else:
-            return None
+            return self.qty < 0
 
-    def divide(self, other: Material) -> tuple[int, int] | None:
-        if isinstance(other, Material) and self.name == other.name:
-            ratio = ceil(self.qty / other.qty)
-            leftover = ratio * other.qty - self.qty
-            return ratio, leftover
+    def divide_by(self, recipe: Material) -> int:
+        if isinstance(recipe, Material) and self.name == recipe.name:
+            ratio = ceil(abs(self.qty) / abs(recipe.qty))
+            return ratio
         else:
-            return None
-
-    def add(self, amount: int) -> Material:
-        return Material(self.name, self.qty + amount)
-
-    def multiply(self, ratio: int) -> Material:
-        return Material(self.name, self.qty * ratio)
+            return 0
 
 
 class Nanofactory:
+    _MAX_ITERS: Final[int] = 100
+
     def __init__(self, reaction_list: list[str]):
         self.reaction_dict: Final[dict[str, tuple[tuple[Material, ...], Material]]] \
-            = Nanofactory.parse_reaction_list(reaction_list)
-        self.inventory: dict[str, Material] = dict()
+            = Nanofactory._parse_reaction_list(reaction_list)
+        self.material_list: Final[set[str]] \
+            = set(self.reaction_dict.keys()) | {Material.ORE, Material.FUEL}
+        self._inventory: dict[str, Material] = dict()
 
     @staticmethod
-    def parse_reaction_list(reaction_list: list[str]) -> dict[str, tuple[tuple[Material, ...], Material]]:
+    def _parse_reaction_list(reaction_list: list[str]) -> dict[str, tuple[tuple[Material, ...], Material]]:
         """
         For a given reaction
         Material input_1, ..., Material input_n -> Material output
@@ -76,8 +81,36 @@ class Nanofactory:
             reaction_dict[output.name] = (inputs, output)
         return reaction_dict
 
-    def get_chemical_list(self) -> list[str]:
-        return list(self.reaction_dict.keys())
+    def get_ore_cost(self, name: str, qty: int) -> int:
+        material = Material(name, qty)
+        self._clear_inventory()
+        self._add_to_inventory(-material)
+        self._reduce_to_ore()
+        ore = self._inventory.get(Material.ORE, Material.empty(Material.ORE))
+        return abs(ore.qty)
 
-    def reduce_to_ore(self, material: Material) -> Material:
-        pass
+    def _clear_inventory(self) -> None:
+        self._inventory = dict()
+
+    def _add_to_inventory(self, material: Material) -> None:
+        name = material.name
+        if name not in self.material_list:
+            return
+        existing_material = self._inventory.get(name, Material.empty(name))
+        self._inventory[name] = existing_material + material
+        if self._inventory[name].is_empty():
+            self._inventory.pop(name)
+
+    def _reduce_to_ore(self) -> None:
+        for _ in range(Nanofactory._MAX_ITERS):
+            done = True
+            for name, material in list(self._inventory.items()):
+                if material.needs_production():
+                    done = False
+                    inputs, output = self.reaction_dict.get(name)
+                    ratio = material.divide_by(output)
+                    for inp in inputs:
+                        self._add_to_inventory(-inp * ratio)
+                    self._add_to_inventory(output * ratio)
+            if done:
+                break
