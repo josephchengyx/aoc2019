@@ -12,7 +12,7 @@ class Cabinet:
         PADDLE = (3, '_')
         BALL = (4, 'o')
 
-        def __new__(cls, _id, _char) -> Self:
+        def __new__(cls, _id: int, _char: str) -> Self:
             obj = object.__new__(cls)
             obj._value_ = _id
             obj.char = _char
