@@ -2,18 +2,18 @@ from PIL import Image, ImageDraw
 
 if __name__ == "__main__":
     with open("day15_output.txt") as file:
-        maze = file.read()
+        grid_map = file.read()
 
     DARK = (0, 0, 0)
     EMPTY = (255, 255, 255)
 
-    rows = [line.split(" ") for line in maze.strip().splitlines()]
-    maze_height, maze_width = len(rows), len(rows[0])
+    rows = [line.split(" ") for line in grid_map.strip().splitlines()]
+    map_height, map_width = len(rows), len(rows[0])
     cell_size = 20
     pad = max(2, cell_size // 5)  # gap between the shape and the cell edge
     line_width = max(2, cell_size // 6)
 
-    img = Image.new("RGB", (maze_width * cell_size, maze_height * cell_size), EMPTY)
+    img = Image.new("RGB", (map_width * cell_size, map_height * cell_size), EMPTY)
     draw = ImageDraw.Draw(img)
     for y, row in enumerate(rows):
         for x, char in enumerate(row):
