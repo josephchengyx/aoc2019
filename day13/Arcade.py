@@ -99,7 +99,7 @@ class Cabinet:
         return screen
 
     def get_block_count(self) -> int:
-        return len(list(filter(lambda tile: tile == Cabinet.Tile.BLOCK, self._screen.values())))
+        return len(list(filter(lambda tile: tile is Cabinet.Tile.BLOCK, self._screen.values())))
 
     def draw_screen(self) -> str:
         screen = self._get_screen()
