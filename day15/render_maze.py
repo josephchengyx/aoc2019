@@ -11,20 +11,20 @@ if __name__ == "__main__":
     maze_height, maze_width = len(rows), len(rows[0])
     cell_size = 20
     pad = max(2, cell_size // 5)  # gap between the shape and the cell edge
-    line_w = max(2, cell_size // 6)
+    line_width = max(2, cell_size // 6)
 
     img = Image.new("RGB", (maze_width * cell_size, maze_height * cell_size), EMPTY)
     draw = ImageDraw.Draw(img)
     for y, row in enumerate(rows):
-        for x, ch in enumerate(row):
+        for x, char in enumerate(row):
             x0, y0 = x * cell_size, y * cell_size
             x1, y1 = x0 + cell_size - 1, y0 + cell_size - 1
-            if ch == "#":
+            if char == "#":
                 draw.rectangle([x0, y0, x1, y1], fill=DARK)
-            elif ch == "o":
-                draw.ellipse([x0 + pad, y0 + pad, x1 - pad, y1 - pad], outline=DARK, width=line_w)
-            elif ch == "x":
-                draw.line([x0 + pad, y0 + pad, x1 - pad, y1 - pad], fill=DARK, width=line_w)
-                draw.line([x0 + pad, y1 - pad, x1 - pad, y0 + pad], fill=DARK, width=line_w)
+            elif char == "o":
+                draw.ellipse([x0 + pad, y0 + pad, x1 - pad, y1 - pad], outline=DARK, width=line_width)
+            elif char == "x":
+                draw.line([x0 + pad, y0 + pad, x1 - pad, y1 - pad], fill=DARK, width=line_width)
+                draw.line([x0 + pad, y1 - pad, x1 - pad, y0 + pad], fill=DARK, width=line_width)
 
     img.save("day15_output.png")
