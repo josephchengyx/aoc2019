@@ -50,14 +50,26 @@ class Path:
     def empty(cls) -> Path:
         return cls(tuple())
 
-    def depth(self) -> int:
+    @property
+    def length(self) -> int:
         return len(self.steps)
 
     def add_step(self, step: Direction) -> Path:
         return Path(self.steps + (step,))
 
-    def reverse(self) -> tuple[Direction, ...]:
-        return tuple(step.opposite for step in self.steps[::-1])
+    def reverse(self) -> Path:
+        return Path(tuple(step.opposite for step in self.steps[::-1]))
+
+    def difference(self, other: Path) -> Path:
+        if self.length == 0:
+            return self
+        else:
+            branch_pt = 0
+            for i, step in enumerate(self.steps):
+                if i >= other.length or step != other.steps[i]:
+                    branch_pt = i
+                    break
+            return Path(self.steps[branch_pt:])
 
 
 class Droid:
@@ -69,25 +81,19 @@ class Droid:
         self._computer: IntCodeComputer = IntCodeComputer()
         self._computer.configure_settings(await_further_input=True)
         self._map_x_min: int = 0  # inclusive
-        self._map_x_max: int = 1  # exclusive
         self._map_y_min: int = 0  # inclusive
+        self._map_x_max: int = 1  # exclusive
         self._map_y_max: int = 1  # exclusive
 
-    def move(self, direction: Direction) -> None:
-        new_position = self.position + direction.vector
-        self._computer.put_input(direction.value)
-        self._computer.run()
-        status = self._computer.read_output().pop()
-        self._update_map(new_position, Location(status))
-        if Location(status).is_movable:
-            self.position = new_position
+    def traverse(self, path: Path, num_steps: Optional[int] = None) -> None:
+        path = path.steps
+        if num_steps is not None:
+            path = path[:num_steps]
+        for direction in path:
+            self._move(direction)
 
     def backtrack(self, path: Path, num_steps: Optional[int] = None) -> None:
-        reverse_path = path.reverse()
-        if isinstance(num_steps, int):
-            reverse_path = reverse_path[:num_steps]
-        for direction in reverse_path:
-            self.move(direction)
+        self.traverse(path.reverse(), num_steps)
 
     def view_map(self) -> str:
         x_range, y_range = self._map_size()
@@ -99,6 +105,15 @@ class Droid:
         grid_map[y0][x0] = 'o'
         grid_map = grid_map[::-1]
         return '\n'.join(''.join(row) for row in grid_map)
+
+    def _move(self, direction: Direction) -> None:
+        new_position = self.position + direction.vector
+        self._computer.put_input(direction.value)
+        self._computer.run()
+        status = self._computer.read_output().pop()
+        self._update_map(new_position, Location(status))
+        if Location(status).is_movable:
+            self.position = new_position
 
     def _update_map(self, position: Vector2D, location: Location) -> None:
         self._map[position] = location
