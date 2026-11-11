@@ -1,21 +1,19 @@
-from Droid import Direction, Path, Droid
-from day10.Vector2D import Vector2D
-from collections import deque
-
-def bfs(droid: Droid, start_position: Vector2D = Droid.origin) -> None:
-    queue: deque[tuple[Vector2D, Path]] = deque()
-    visited: set[Vector2D] = set()
-    queue.append((start_position, Path.empty()))
-    while queue:
-        position, path = queue.popleft()
-        droid.traverse(path)
-        for direction in Direction:
-            new_position = position + direction.vector
-            new_path = path.add_step(direction)
-            if new_position not in visited:
-                queue.append((new_position, new_path))
-        droid.backtrack(path)
+from Droid import Droid
 
 if __name__ == "__main__":
     with open("day15_input.txt") as file:
         data = list(map(int, file.read().split(',')))
+
+    droid = Droid()
+    droid.load_program(data)
+    droid.bfs()
+
+    o2_system_position = droid.get_o2_system_position()
+    path_to_o2_system = droid.get_path_to_position(o2_system_position)
+    print(f"Part 1: {path_to_o2_system.length}")
+
+    droid.move_to(o2_system_position)
+    print(f"Part 2: {droid.get_max_path_length()}")
+
+    with open("day15_output.txt", "w") as file:
+        file.write(droid.view_map())
