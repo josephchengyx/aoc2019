@@ -82,6 +82,7 @@ class Path:
                 stack.append(step)
         return Path(tuple(stack))
 
+
 class Droid:
     origin: Final[Vector2D] = Vector2D.zero()
 
