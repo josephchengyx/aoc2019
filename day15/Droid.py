@@ -113,13 +113,11 @@ class Droid:
 
     def bfs(self, max_depth: Optional[int] = inf) -> None:
         queue: deque[tuple[Vector2D, Path]] = deque()
-        visited: set[Vector2D] = set()
         queue.append((self.position, Path.empty()))
         path_to_start = Path.empty()
         while queue:
             position, path_from_start = queue.popleft()
             self._traverse(path_to_start + path_from_start)
-            visited.add(position)
             if self.position != position:  # encountered a Location.WALL
                 path_from_start = path_from_start.remove_step()
             else:
@@ -127,7 +125,7 @@ class Droid:
                 for direction in Direction:
                     new_position = position + direction.vector
                     new_path_from_start = path_from_start.add_step(direction)
-                    if new_position not in visited and new_path_from_start.length <= max_depth:
+                    if new_position not in self._map and new_path_from_start.length <= max_depth:
                         queue.append((new_position, new_path_from_start))
             path_to_start = path_from_start.reverse()
         self._traverse(path_to_start)
