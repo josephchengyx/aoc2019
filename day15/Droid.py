@@ -87,7 +87,7 @@ class Droid:
     origin: Final[Vector2D] = Vector2D.zero()
 
     def __init__(self) -> None:
-        self.position: Vector2D = Droid.origin
+        self._position: Vector2D = Droid.origin
         self._computer: IntCodeComputer = IntCodeComputer()
         self._computer.configure_settings(await_further_input=True)
         self._program: list[int] = list()
@@ -103,9 +103,9 @@ class Droid:
         self._computer.load_program(self._program)
 
     def restart(self) -> None:
+        self._position = Droid.origin
         self._computer.reset()
         self._computer.load_program(self._program)
-        self.position = Droid.origin
         self._map = dict()
         self._paths = dict()
         self._map_x_min = 0
@@ -115,12 +115,12 @@ class Droid:
 
     def bfs(self, max_depth: Optional[int] = inf) -> None:
         queue: deque[tuple[Vector2D, Path]] = deque()
-        queue.append((self.position, Path.empty()))
+        queue.append((self._position, Path.empty()))
         path_to_start = Path.empty()
         while queue:
             position, path_from_start = queue.popleft()
             self._traverse(path_to_start + path_from_start)
-            if self.position != position:  # encountered a Location.WALL
+            if self._position != position:  # encountered a Location.WALL
                 path_from_start = path_from_start.remove_step()
             else:
                 self._paths[position] = path_from_start
@@ -132,7 +132,10 @@ class Droid:
             path_to_start = path_from_start.reverse()
         self._traverse(path_to_start)
 
-    def get_path_to_position(self, position: Vector2D) -> Path | None:
+    def get_position(self) -> Vector2D:
+        return self._position
+
+    def get_path_to(self, position: Vector2D) -> Path | None:
         return self._paths.get(position, None)
 
     def get_o2_system_position(self) -> Vector2D | None:
@@ -149,7 +152,7 @@ class Droid:
         return max_length
 
     def move_to(self, position: Vector2D) -> None:
-        path = self.get_path_to_position(position)
+        path = self.get_path_to(position)
         if path is not None:
             self._traverse(path)
             self._update_paths()
@@ -173,13 +176,13 @@ class Droid:
             self._move(direction)
 
     def _move(self, direction: Direction) -> None:
-        new_position = self.position + direction.vector
+        new_position = self._position + direction.vector
         self._computer.put_input(direction.value)
         self._computer.run()
         status = self._computer.read_output().pop()
         self._update_map(new_position, Location(status))
         if Location(status).is_movable:
-            self.position = new_position
+            self._position = new_position
 
     def _update_map(self, position: Vector2D, location: Location) -> None:
         if position in self._map:
@@ -196,7 +199,7 @@ class Droid:
             self._map_y_max = y + 1
 
     def _update_paths(self) -> None:
-        offset = self.get_path_to_position(self.position)
+        offset = self.get_path_to(self._position)
         if offset is None or offset.length == 0:
             return
         offset = offset.reverse()

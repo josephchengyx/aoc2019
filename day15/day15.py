@@ -9,7 +9,7 @@ if __name__ == "__main__":
     droid.bfs()
 
     o2_system_position = droid.get_o2_system_position()
-    path_to_o2_system = droid.get_path_to_position(o2_system_position)
+    path_to_o2_system = droid.get_path_to(o2_system_position)
     print(f"Part 1: {path_to_o2_system.length}")
 
     droid.move_to(o2_system_position)
