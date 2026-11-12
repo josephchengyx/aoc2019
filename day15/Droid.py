@@ -107,6 +107,7 @@ class Droid:
         self._computer.load_program(self._program)
         self.position = Droid.origin
         self._map = dict()
+        self._paths = dict()
         self._map_x_min = 0
         self._map_y_min = 0
         self._map_x_max = 1
