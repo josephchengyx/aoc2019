@@ -1,12 +1,8 @@
+from __future__ import annotations
 from IntCode.v3 import IntCodeComputer
 from day10.Vector2D import Vector2D
-from enum import Enum, StrEnum
-
-class Direction(Enum):
-    UP    = Vector2D(0, -1)
-    DOWN  = Vector2D(0, 1)
-    LEFT  = Vector2D(-1, 0)
-    RIGHT = Vector2D(1, 0)
+from enum import Enum, StrEnum, nonmember
+from typing import Final
 
 class ASCII:
     class Pixel(StrEnum):
@@ -131,3 +127,58 @@ class ASCII:
                 if self._is_intersection_point(point):
                     parameters.append(ASCII.alignment_parameter(point))
         return parameters
+
+
+class Direction(Enum):
+    UP    = Vector2D(0, -1)
+    DOWN  = Vector2D(0, 1)
+    LEFT  = Vector2D(-1, 0)
+    RIGHT = Vector2D(1, 0)
+
+    _LEFT_TURN = nonmember(((0, 1), (-1, 0)))
+    _RIGHT_TURN = nonmember(((0, -1), (1, 0)))
+
+    def turn_left(self) -> Direction:
+        return Direction(self.value.transform(Direction._LEFT_TURN))
+
+    def turn_right(self) -> Direction:
+        return Direction(self.value.transform(Direction._RIGHT_TURN))
+
+
+class Pathfinder:
+    def __init__(self, ascii_program: ASCII) -> None:
+        self._ascii: ASCII = ascii_program
+        self._instruction_list: list[str] = list()
+        self._position: Vector2D = Vector2D.zero()
+        self._heading: Direction = Direction.UP
+
+        if not self._ascii._camera_view:
+            self._ascii.update_camera_view()
+        self._find_robot_position_and_heading()
+
+    _robot_pixel_to_heading: Final[dict[ASCII.Pixel, Direction]] = {
+        ASCII.Pixel.ROBOT_UP: Direction.UP,
+        ASCII.Pixel.ROBOT_DOWN: Direction.DOWN,
+        ASCII.Pixel.ROBOT_LEFT: Direction.LEFT,
+        ASCII.Pixel.ROBOT_RIGHT: Direction.RIGHT
+    }
+
+    def _find_robot_position_and_heading(self) -> None:
+        for y in range(self._ascii._camera_y_bound):
+            for x in range(self._ascii._camera_x_bound):
+                position = Vector2D(x, y)
+                pixel = self._ascii._camera_pixel_at(position)
+                heading = Pathfinder._robot_pixel_to_heading.get(ASCII.Pixel(pixel), None)
+                if heading is not None:
+                    self._position = position
+                    self._heading = heading
+                    return
+
+    def _in_front(self) -> Vector2D:
+        return self._position + self._heading.value
+
+    def _on_left(self) -> Vector2D:
+        return self._position + self._heading.turn_left().value
+
+    def _on_right(self) -> Vector2D:
+        return self._position + self._heading.turn_right().value
