@@ -16,7 +16,7 @@ class ASCII:
         ROBOT_DOWN  = 'v'
         ROBOT_LEFT  = '<'
         ROBOT_RIGHT = '>'
-        ROBOT_FALL  = 'X'
+        ROBOT_FELL  = 'X'
 
     class Mode(Enum):
         CAMERA = 0
