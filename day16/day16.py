@@ -25,6 +25,7 @@ def fast_fft(signal: list[int], signal_repeats: int, num_phases: int) -> int:
     # N.B.: fast-flawed frequency transmission, not fast-fast fourier transform
     signal_length = len(signal) * signal_repeats
     offset = digit_list_to_int(signal[:7])
+    assert offset >= signal_length // 2, "only works if message location is past half the signal length!"
 
     def get_signal_element(idx: int) -> int:
         if idx < 0: idx += signal_length
