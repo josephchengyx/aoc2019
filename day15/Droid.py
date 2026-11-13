@@ -161,9 +161,9 @@ class Droid:
         x_range, y_range = self._map_size()
         grid_map: list[list[str]] = [['#' for x in range(x_range)] for y in range(y_range)]
         for position, location in self._map.items():
-            x, y = tuple(self._to_map_coords(position))
+            x, y = self._to_map_coords(position)
             grid_map[y][x] = location.item
-        x0, y0 = tuple(self._to_map_coords(Droid.origin))
+        x0, y0 = self._to_map_coords(Droid.origin)
         grid_map[y0][x0] = 'o'
         grid_map = grid_map[::-1]
         return '\n'.join(' '.join(row) for row in grid_map)
@@ -188,7 +188,7 @@ class Droid:
         if position in self._map:
             return
         self._map[position] = location
-        x, y = tuple(position)
+        x, y = position
         if x < self._map_x_min:
             self._map_x_min = x
         elif x >= self._map_x_max:
