@@ -47,7 +47,7 @@ class Location(Enum):
 
 @dataclass(frozen=True)
 class Path:
-    steps: Final[tuple[Direction, ...]]
+    steps: tuple[Direction, ...]
 
     @classmethod
     def empty(cls) -> Path:
