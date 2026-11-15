@@ -21,32 +21,32 @@ class ASCII:
     def __init__(self) -> None:
         self._computer: IntCodeComputer = IntCodeComputer()
         self._program: list[int] = list()
-        self._camera_view: list[list[str]] = list(list())
+        self._camera_feed: list[list[str]] = list(list())
         self._robot_instructions: list[list[int]] = list(list())
         self._robot_output: int = 0
         self._mode: ASCII.Mode = ASCII.Mode.CAMERA
 
     @property
     def _camera_x_bound(self) -> int:
-        return len(self._camera_view[0])
+        return len(self._camera_feed[0])
 
     @property
     def _camera_y_bound(self) -> int:
-        return len(self._camera_view)
+        return len(self._camera_feed)
 
     def load_program(self, program: list[int]) -> None:
         self._program = program
         self._computer.load_program(self._program)
 
-    def update_camera_view(self) -> None:
+    def update_camera_feed(self) -> None:
         if self._mode is ASCII.Mode.ROBOT:
             self._switch_to_camera_mode()
         self._computer.run()
         intcode_output = self._computer.read_output()
-        self._camera_view = ASCII._parse_camera_output(intcode_output)
+        self._camera_feed = ASCII._parse_camera_output(intcode_output)
 
-    def get_camera_view(self) -> str:
-        return ASCII._format_camera_view(self._camera_view)
+    def get_camera_feed(self) -> str:
+        return ASCII._format_camera_feed(self._camera_feed)
 
     def input_robot_instructions(self, instructions: list[str]) -> None:
         self._robot_instructions = list(map(ASCII._parse_robot_instruction, instructions))
@@ -91,8 +91,8 @@ class ASCII:
         return list(map(ord, list(instruction)))
 
     @staticmethod
-    def _format_camera_view(camera_view: list[list[str]]) -> str:
-        return '\n'.join(map(lambda row: ' '.join(row), camera_view))
+    def _format_camera_feed(camera_feed: list[list[str]]) -> str:
+        return '\n'.join(map(lambda row: ' '.join(row), camera_feed))
 
     def _is_in_bounds(self, point: Vector2D) -> bool:
         return 0 <= point.x < self._camera_x_bound and 0 <= point.y < self._camera_y_bound
@@ -100,7 +100,7 @@ class ASCII:
     def _camera_pixel_at(self, point: Vector2D) -> str | None:
         if not self._is_in_bounds(point):
             return None
-        return self._camera_view[point.y][point.x]
+        return self._camera_feed[point.y][point.x]
 
     def _get_neighbouring_points(self, point: Vector2D) -> list[Vector2D]:
         neighbours = [point + direction.value for direction in Direction]
@@ -148,12 +148,12 @@ class Direction(Enum):
 class Pathfinder:
     def __init__(self, ascii_program: ASCII) -> None:
         self._ascii: ASCII = ascii_program
-        self._instruction_list: list[str] = list()
+        self._instructions: list[str] = list()
         self._position: Vector2D = Vector2D.zero()
         self._heading: Direction = Direction.UP
 
-        if not self._ascii._camera_view:
-            self._ascii.update_camera_view()
+        if not self._ascii._camera_feed:
+            self._ascii.update_camera_feed()
         self._find_robot_position_and_heading()
 
     _robot_pixel_to_heading: Final[dict[ASCII.Pixel, Direction]] = {
@@ -182,3 +182,34 @@ class Pathfinder:
 
     def _on_right(self) -> Vector2D:
         return self._position + self._heading.turn_right().value
+
+    def _behind(self) -> Vector2D:
+        return self._position - self._heading.value
+
+    def find_path(self, max_iters: int = 1_000) -> None:
+        if self._instructions:
+            return
+        steps = 0
+        for _ in range(max_iters):
+            if self._ascii._camera_pixel_at(self._in_front()) == ASCII.Pixel.SCAFFOLD:
+                steps += 1
+                self._position += self._heading.value
+                continue
+            if steps > 0:
+                self._instructions.append(str(steps))
+                steps = 0
+            if self._ascii._camera_pixel_at(self._on_left()) == ASCII.Pixel.SCAFFOLD:
+                self._instructions.append('L')
+                self._heading = self._heading.turn_left()
+            elif self._ascii._camera_pixel_at(self._on_right()) == ASCII.Pixel.SCAFFOLD:
+                self._instructions.append('R')
+                self._heading = self._heading.turn_right()
+            else:
+                break
+
+    def get_instructions(self) -> list[str]:
+        return self._instructions
+
+    @staticmethod
+    def format_instructions(instructions: list[str]) -> str:
+        return ','.join(instructions)
