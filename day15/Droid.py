@@ -145,11 +145,7 @@ class Droid:
         return None
 
     def get_max_path_length(self) -> int:
-        max_length = 0
-        for position, path in self._paths.items():
-            if path.length > max_length:
-                max_length = path.length
-        return max_length
+        return max(map(lambda path: path.length, self._paths.values()), default=0)
 
     def move_to(self, position: Vector2D) -> None:
         path = self.get_path_to(position)
