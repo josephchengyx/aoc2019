@@ -148,6 +148,7 @@ class Direction(Enum):
 class Pathfinder:
     def __init__(self, ascii_program: ASCII) -> None:
         self._ascii: ASCII = ascii_program
+        self._path: list[str] = list()
         self._instructions: list[str] = list()
         self._position: Vector2D = Vector2D.zero()
         self._heading: Direction = Direction.UP
@@ -162,6 +163,9 @@ class Pathfinder:
         ASCII.Pixel.ROBOT_LEFT: Direction.LEFT,
         ASCII.Pixel.ROBOT_RIGHT: Direction.RIGHT
     }
+
+    NUM_FUNCTIONS = 3
+    MAX_FUNCTION_LENGTH = 10
 
     def _find_robot_position_and_heading(self) -> None:
         for y in range(self._ascii._camera_y_bound):
@@ -187,7 +191,7 @@ class Pathfinder:
         return self._position - self._heading.value
 
     def find_path(self, max_iters: int = 1_000) -> None:
-        if self._instructions:
+        if self._path:
             return
         steps = 0
         for _ in range(max_iters):
@@ -196,20 +200,88 @@ class Pathfinder:
                 self._position += self._heading.value
                 continue
             if steps > 0:
-                self._instructions.append(str(steps))
+                self._path.append(str(steps))
                 steps = 0
             if self._ascii._camera_pixel_at(self._on_left()) == ASCII.Pixel.SCAFFOLD:
-                self._instructions.append('L')
+                self._path.append('L')
                 self._heading = self._heading.turn_left()
             elif self._ascii._camera_pixel_at(self._on_right()) == ASCII.Pixel.SCAFFOLD:
-                self._instructions.append('R')
+                self._path.append('R')
                 self._heading = self._heading.turn_right()
             else:
                 break
+
+    def compress_path(self) -> None:
+        def next_unassigned_range(assignment: list[int]) -> tuple[int, int]:
+            start = 0
+            while start < len(assignment) and assignment[start] != 0:
+                start += 1
+            end = start
+            while end < len(assignment) and assignment[end] == 0:
+                end += 1
+            return start, end
+
+        def mark_all_occurences(function: list[str], assignment: list[int], function_number: int) -> list[int]:
+            for start in range(len(assignment) - len(function) + 1):
+                end = start + len(function)
+                if self._path[start:end] == function and not any(assignment[start:end]):
+                    assignment[start:end] = [function_number] * len(function)
+            return assignment
+
+        def unmark_all_occurences(assignment: list[int], function_number: int) -> list[int]:
+            for idx, element in enumerate(assignment):
+                if element == function_number:
+                    assignment[idx] = 0
+            return assignment
+
+        def extract_main_routine(functions: list[list[str]], assignment: list[int]) -> str:
+            function_names = ['A', 'B', 'C']
+            main_routine = list()
+            current_function = -1
+            current_length = 0
+            for function_number in assignment:
+                function_number -= 1
+                if current_function == -1:
+                    current_function = function_number
+                if function_number != current_function or current_length > len(functions[current_function]):
+                    main_routine.append(function_names[current_function])
+                    current_function = function_number
+                    current_length = 0
+                current_length += 1
+            if current_function != -1:
+                main_routine.append(function_names[current_function])
+            return Pathfinder.format_instruction(main_routine)
+
+        def backtrack(functions: list[list[str]], assignment: list[int]) \
+                -> tuple[list[list[str]], list[int]]:
+            if len(functions) == Pathfinder.NUM_FUNCTIONS and all(assignment):
+                return functions, assignment
+            elif len(functions) < Pathfinder.NUM_FUNCTIONS:
+                start, end = next_unassigned_range(assignment)
+                max_length = min(end - start, Pathfinder.MAX_FUNCTION_LENGTH)
+                for length in range(max_length, 0, -2):
+                    next_function = self._path[start:start + length]
+                    functions.append(next_function)
+                    assignment = mark_all_occurences(next_function, assignment, len(functions))
+                    next_functions, next_assignment = backtrack(functions, assignment)
+                    if next_functions and next_assignment:
+                        return next_functions, next_assignment
+                    assignment = unmark_all_occurences(assignment, len(functions))
+                    functions.pop()
+            return list(list()), list()
+
+        if self._instructions:
+            return
+        functions, assignment = backtrack(list(), [0 for cmd in self._path])
+        main_routine = extract_main_routine(functions, assignment)
+        self._instructions = [main_routine] + list(map(Pathfinder.format_instruction, functions))
+
+    def get_path(self) -> list[str]:
+        return self._path
 
     def get_instructions(self) -> list[str]:
         return self._instructions
 
     @staticmethod
-    def format_instructions(instructions: list[str]) -> str:
-        return ','.join(instructions)
+    def format_instruction(instruction: list[str]) -> str:
+        return ','.join(instruction) + '\n'
