@@ -152,6 +152,7 @@ class Pathfinder:
         self._instructions: list[str] = list()
         self._position: Vector2D = Vector2D.zero()
         self._heading: Direction = Direction.UP
+        self._live_camera_feed: bool = False
 
         if not self._ascii._camera_feed:
             self._ascii.update_camera_feed()
@@ -164,8 +165,11 @@ class Pathfinder:
         ASCII.Pixel.ROBOT_RIGHT: Direction.RIGHT
     }
 
-    NUM_FUNCTIONS = 3
-    MAX_FUNCTION_LENGTH = 10
+    num_functions = 3
+    max_function_length = 10
+
+    def set_live_camera_feed(self, is_live: bool) -> None:
+        self._live_camera_feed = is_live
 
     def _find_robot_position_and_heading(self) -> None:
         for y in range(self._ascii._camera_y_bound):
@@ -254,11 +258,11 @@ class Pathfinder:
 
         def backtrack(functions: list[list[str]], assignment: list[int]) \
                 -> tuple[list[list[str]], list[int]]:
-            if len(functions) == Pathfinder.NUM_FUNCTIONS and all(assignment):
+            if len(functions) == Pathfinder.num_functions and all(assignment):
                 return functions, assignment
-            elif len(functions) < Pathfinder.NUM_FUNCTIONS:
+            elif len(functions) < Pathfinder.num_functions:
                 start, end = next_unassigned_range(assignment)
-                max_length = min(end - start, Pathfinder.MAX_FUNCTION_LENGTH)
+                max_length = min(end - start, Pathfinder.max_function_length)
                 for length in range(max_length, 0, -2):
                     next_function = self._path[start:start + length]
                     functions.append(next_function)
@@ -268,13 +272,14 @@ class Pathfinder:
                         return next_functions, next_assignment
                     assignment = unmark_all_occurences(assignment, len(functions))
                     functions.pop()
-            return list(list()), list()
+            return list(), list()
 
         if self._instructions:
             return
         functions, assignment = backtrack(list(), [0 for cmd in self._path])
         main_routine = extract_main_routine(functions, assignment)
-        self._instructions = [main_routine] + list(map(Pathfinder.format_instruction, functions))
+        live_camera_feed = 'y\n' if self._live_camera_feed else 'n\n'
+        self._instructions = [main_routine] + list(map(Pathfinder.format_instruction, functions)) + [live_camera_feed]
 
     def get_path(self) -> list[str]:
         return self._path

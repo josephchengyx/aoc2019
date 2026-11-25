@@ -17,7 +17,6 @@ if __name__ == "__main__":
     pathfinder.find_path()
     pathfinder.compress_path()
     instructions = pathfinder.get_instructions()
-    instructions.append('n\n')  # don't want live camera feed
 
     with open("day17_robot_instructions.txt", "w") as file:
         file.write(''.join(instructions))
