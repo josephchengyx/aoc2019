@@ -103,7 +103,7 @@ class ASCII:
         return self._camera_feed[point.y][point.x]
 
     def _get_neighbouring_points(self, point: Vector2D) -> list[Vector2D]:
-        neighbours = [point + direction.value for direction in Direction]
+        neighbours = [point + direction.vector for direction in Direction]
         return list(filter(self._is_in_bounds, neighbours))
 
     def _is_intersection_point(self, point: Vector2D) -> bool:
@@ -187,16 +187,16 @@ class Pathfinder:
                     return
 
     def _in_front(self) -> Vector2D:
-        return self._position + self._heading.value
+        return self._position + self._heading.vector
 
     def _on_left(self) -> Vector2D:
-        return self._position + self._heading.turn_left().value
+        return self._position + self._heading.turn_left().vector
 
     def _on_right(self) -> Vector2D:
-        return self._position + self._heading.turn_right().value
+        return self._position + self._heading.turn_right().vector
 
     def _behind(self) -> Vector2D:
-        return self._position - self._heading.value
+        return self._position - self._heading.vector
 
     def find_path(self, max_iters: int = 1_000) -> None:
         if self._path:
@@ -205,7 +205,7 @@ class Pathfinder:
         for _ in range(max_iters):
             if self._ascii._camera_pixel_at(self._in_front()) == ASCII.Pixel.SCAFFOLD:
                 steps += 1
-                self._position += self._heading.value
+                self._position += self._heading.vector
                 continue
             if steps > 0:
                 self._path.append(str(steps))
