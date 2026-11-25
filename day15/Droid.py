@@ -11,8 +11,8 @@ from typing import Self, Optional, Final
 class Direction(Enum):
     NORTH = (1, Vector2D(0, 1))
     SOUTH = (2, Vector2D(0, -1))
-    WEST = (3, Vector2D(-1, 0))
-    EAST = (4, Vector2D(1, 0))
+    WEST  = (3, Vector2D(-1, 0))
+    EAST  = (4, Vector2D(1, 0))
 
     def __new__(cls, cmd: int, vector: Vector2D) -> Self:
         obj = object.__new__(cls)
@@ -28,13 +28,13 @@ class Direction(Enum):
         return None
 
     @property
-    def opposite(self) -> Self:
+    def opposite(self) -> Direction:
         return Direction.from_vector(-self.vector)
 
 
 class Location(Enum):
-    WALL = (0, '#', False)
-    OPEN = (1, '.', True)
+    WALL      = (0, '#', False)
+    OPEN      = (1, '.', True)
     O2_SYSTEM = (2, 'x', True)
 
     def __new__(cls, status: int, item: str, is_movable: bool) -> Self:

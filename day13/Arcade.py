@@ -6,11 +6,11 @@ import curses, time
 
 class Cabinet:
     class Tile(Enum):
-        EMPTY = (0, ' ')
-        WALL = (1, 'X')
-        BLOCK = (2, '*')
+        EMPTY  = (0, ' ')
+        WALL   = (1, 'X')
+        BLOCK  = (2, '*')
         PADDLE = (3, '_')
-        BALL = (4, 'o')
+        BALL   = (4, 'o')
 
         def __new__(cls, _id: int, _char: str) -> Self:
             obj = object.__new__(cls)

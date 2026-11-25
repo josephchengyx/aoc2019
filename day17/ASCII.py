@@ -135,8 +135,16 @@ class Direction(Enum):
     LEFT  = Vector2D(-1, 0)
     RIGHT = Vector2D(1, 0)
 
-    _LEFT_TURN = nonmember(((0, 1), (-1, 0)))
+    _LEFT_TURN  = nonmember(((0, 1), (-1, 0)))
     _RIGHT_TURN = nonmember(((0, -1), (1, 0)))
+
+    @property
+    def vector(self) -> Vector2D:
+        return self.value
+
+    @property
+    def opposite(self) -> Direction:
+        return Direction(-self.value)
 
     def turn_left(self) -> Direction:
         return Direction(self.value.transform(Direction._LEFT_TURN))
