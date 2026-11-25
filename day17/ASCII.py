@@ -158,15 +158,14 @@ class Pathfinder:
             self._ascii.update_camera_feed()
         self._find_robot_position_and_heading()
 
+    _max_function_length: Final[int] = 10
+    _function_names: Final[tuple[str, ...]] = ('A', 'B', 'C')
     _robot_pixel_to_heading: Final[dict[ASCII.Pixel, Direction]] = {
         ASCII.Pixel.ROBOT_UP: Direction.UP,
         ASCII.Pixel.ROBOT_DOWN: Direction.DOWN,
         ASCII.Pixel.ROBOT_LEFT: Direction.LEFT,
         ASCII.Pixel.ROBOT_RIGHT: Direction.RIGHT
     }
-
-    max_function_length = 10
-    function_names = ['A', 'B', 'C']
 
     def _find_robot_position_and_heading(self) -> None:
         for y in range(self._ascii._camera_y_bound):
@@ -244,20 +243,20 @@ class Pathfinder:
                 if current_function == -1:
                     current_function = function_number
                 if function_number != current_function or current_length > len(functions[current_function]):
-                    main_routine.append(Pathfinder.function_names[current_function])
+                    main_routine.append(Pathfinder._function_names[current_function])
                     current_function = function_number
                     current_length = 0
                 current_length += 1
             if current_function != -1:
-                main_routine.append(Pathfinder.function_names[current_function])
+                main_routine.append(Pathfinder._function_names[current_function])
             return Pathfinder.format_instruction(main_routine)
 
         def backtrack(functions: list[list[str]], assignment: list[int]) -> tuple[list[list[str]], list[int]]:
-            if len(functions) == len(Pathfinder.function_names) and all(assignment):
+            if len(functions) == len(Pathfinder._function_names) and all(assignment):
                 return functions, assignment
-            elif len(functions) < len(Pathfinder.function_names):
+            elif len(functions) < len(Pathfinder._function_names):
                 start, end = next_unassigned_range(assignment)
-                max_length = min(end - start, Pathfinder.max_function_length)
+                max_length = min(end - start, Pathfinder._max_function_length)
                 for length in range(max_length, 0, -2):
                     next_function = self._path[start:start + length]
                     functions.append(next_function)
