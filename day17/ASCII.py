@@ -154,6 +154,15 @@ class Direction(Enum):
 
 
 class Pathfinder:
+    _max_function_length: Final[int] = 10
+    _function_names: Final[tuple[str, ...]] = ('A', 'B', 'C')
+    _robot_pixel_to_heading: Final[dict[ASCII.Pixel, Direction]] = {
+        ASCII.Pixel.ROBOT_UP: Direction.UP,
+        ASCII.Pixel.ROBOT_DOWN: Direction.DOWN,
+        ASCII.Pixel.ROBOT_LEFT: Direction.LEFT,
+        ASCII.Pixel.ROBOT_RIGHT: Direction.RIGHT
+    }
+
     def __init__(self, ascii_program: ASCII) -> None:
         self._ascii: ASCII = ascii_program
         self._path: list[str] = list()
@@ -165,15 +174,6 @@ class Pathfinder:
         if not self._ascii._camera_feed:
             self._ascii.update_camera_feed()
         self._find_robot_position_and_heading()
-
-    _max_function_length: Final[int] = 10
-    _function_names: Final[tuple[str, ...]] = ('A', 'B', 'C')
-    _robot_pixel_to_heading: Final[dict[ASCII.Pixel, Direction]] = {
-        ASCII.Pixel.ROBOT_UP: Direction.UP,
-        ASCII.Pixel.ROBOT_DOWN: Direction.DOWN,
-        ASCII.Pixel.ROBOT_LEFT: Direction.LEFT,
-        ASCII.Pixel.ROBOT_RIGHT: Direction.RIGHT
-    }
 
     def _find_robot_position_and_heading(self) -> None:
         for y in range(self._ascii._camera_y_bound):
