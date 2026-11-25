@@ -165,11 +165,8 @@ class Pathfinder:
         ASCII.Pixel.ROBOT_RIGHT: Direction.RIGHT
     }
 
-    num_functions = 3
     max_function_length = 10
-
-    def set_live_camera_feed(self, is_live: bool) -> None:
-        self._live_camera_feed = is_live
+    function_names = ['A', 'B', 'C']
 
     def _find_robot_position_and_heading(self) -> None:
         for y in range(self._ascii._camera_y_bound):
@@ -239,7 +236,6 @@ class Pathfinder:
             return assignment
 
         def extract_main_routine(functions: list[list[str]], assignment: list[int]) -> str:
-            function_names = ['A', 'B', 'C']
             main_routine = list()
             current_function = -1
             current_length = 0
@@ -248,19 +244,18 @@ class Pathfinder:
                 if current_function == -1:
                     current_function = function_number
                 if function_number != current_function or current_length > len(functions[current_function]):
-                    main_routine.append(function_names[current_function])
+                    main_routine.append(Pathfinder.function_names[current_function])
                     current_function = function_number
                     current_length = 0
                 current_length += 1
             if current_function != -1:
-                main_routine.append(function_names[current_function])
+                main_routine.append(Pathfinder.function_names[current_function])
             return Pathfinder.format_instruction(main_routine)
 
-        def backtrack(functions: list[list[str]], assignment: list[int]) \
-                -> tuple[list[list[str]], list[int]]:
-            if len(functions) == Pathfinder.num_functions and all(assignment):
+        def backtrack(functions: list[list[str]], assignment: list[int]) -> tuple[list[list[str]], list[int]]:
+            if len(functions) == len(Pathfinder.function_names) and all(assignment):
                 return functions, assignment
-            elif len(functions) < Pathfinder.num_functions:
+            elif len(functions) < len(Pathfinder.function_names):
                 start, end = next_unassigned_range(assignment)
                 max_length = min(end - start, Pathfinder.max_function_length)
                 for length in range(max_length, 0, -2):
@@ -280,6 +275,9 @@ class Pathfinder:
         main_routine = extract_main_routine(functions, assignment)
         live_camera_feed = 'y\n' if self._live_camera_feed else 'n\n'
         self._instructions = [main_routine] + list(map(Pathfinder.format_instruction, functions)) + [live_camera_feed]
+
+    def set_live_camera_feed(self, is_live: bool) -> None:
+        self._live_camera_feed = is_live
 
     def get_path(self) -> list[str]:
         return self._path
