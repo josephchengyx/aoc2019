@@ -258,7 +258,7 @@ class Pathfinder:
                 start, end = next_unassigned_range(assignment)
                 max_length = min(end - start, Pathfinder._max_function_length)
                 for length in range(max_length, 0, -2):
-                    next_function = self._path[start:start + length]
+                    next_function = self._path[start:start+length]
                     functions.append(next_function)
                     assignment = mark_all_occurences(next_function, assignment, len(functions))
                     next_functions, next_assignment = backtrack(functions, assignment)
