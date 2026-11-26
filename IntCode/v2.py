@@ -1,4 +1,4 @@
-from typing import Sequence, Any, Optional, Final
+from typing import Sequence, Any, Final
 from collections import deque
 from copy import copy
 
@@ -40,7 +40,7 @@ class IntCodeComputer:
         else:
             self._input.extend(value)
 
-    def read_output(self, num_items: Optional[int] = None) -> list[int]:
+    def read_output(self, num_items: int | None = None) -> list[int]:
         if num_items is None:
             output = self._output
             self._output = list()

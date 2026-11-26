@@ -1,7 +1,7 @@
 from __future__ import annotations
 from IntCode.v3 import IntCodeComputer
 from enum import Enum
-from typing import Self, Final, Callable, Optional
+from typing import Self, Final, Callable
 import curses, time
 
 class Cabinet:
@@ -46,7 +46,7 @@ class Cabinet:
         self._computer.reset()
         self._computer.load_program(self._program)
 
-    def play(self, input_source: Optional[Callable[[Cabinet], int]] = None) -> None:
+    def play(self, input_source: Callable[[Cabinet], int] | None = None) -> None:
         if input_source is None:
             input_source = Cabinet._get_joystick_input
         self._set_to_play_mode()
@@ -118,7 +118,7 @@ class InteractiveCabinet(Cabinet):
         self.framerate_hz = framerate_hz
         self._frame_time_secs = 1 / self.framerate_hz
 
-    def play(self, input_source: Optional[Callable[[Cabinet], int]] = None) -> None:
+    def play(self, input_source: Callable[[Cabinet], int] | None = None) -> None:
         curses.wrapper(self._run)
 
     def _run(self, stdscr: curses.window) -> None:

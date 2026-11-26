@@ -1,5 +1,4 @@
 from __future__ import annotations
-from typing import Any
 
 class TreeNode:
     def __init__(self, value: str) -> None:
@@ -10,7 +9,7 @@ class TreeNode:
     def __repr__(self) -> str:
         return self.value
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         if isinstance(other, TreeNode):
             return self.value == other.value
         return False

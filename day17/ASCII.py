@@ -2,7 +2,7 @@ from __future__ import annotations
 from IntCode.v3 import IntCodeComputer
 from day10.Vector2D import Vector2D
 from enum import Enum, StrEnum, nonmember
-from typing import Final
+from typing import Self, Final
 
 class ASCII:
     class Pixel(StrEnum):
@@ -13,6 +13,10 @@ class ASCII:
         ROBOT_LEFT  = '<'
         ROBOT_RIGHT = '>'
         ROBOT_FELL  = 'X'
+
+        @classmethod
+        def _missing_(cls, value: object) -> Self | None:
+            return None
 
     class Mode(Enum):
         CAMERA = 0

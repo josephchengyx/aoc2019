@@ -6,7 +6,7 @@ from enum import Enum
 from collections import deque
 from math import inf
 from functools import reduce
-from typing import Self, Optional, Final
+from typing import Self, Final
 
 class Direction(Enum):
     NORTH = (1, Vector2D(0, 1))
@@ -113,7 +113,7 @@ class Droid:
         self._map_x_max = 1
         self._map_y_max = 1
 
-    def bfs(self, max_depth: Optional[int] = inf) -> None:
+    def bfs(self, max_depth: int = inf) -> None:
         queue: deque[tuple[Vector2D, Path]] = deque()
         queue.append((self._position, Path.empty()))
         path_to_start = Path.empty()
@@ -164,7 +164,7 @@ class Droid:
         grid_map = grid_map[::-1]
         return '\n'.join(' '.join(row) for row in grid_map)
 
-    def _traverse(self, path: Path, num_steps: Optional[int] = None) -> None:
+    def _traverse(self, path: Path, num_steps: int | None = None) -> None:
         path = path.steps
         if num_steps is not None:
             path = path[:num_steps]
