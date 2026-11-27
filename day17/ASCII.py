@@ -25,8 +25,8 @@ class ASCII:
     def __init__(self) -> None:
         self._computer: IntCodeComputer = IntCodeComputer()
         self._program: list[int] = list()
-        self._camera_feed: list[list[str]] = list(list())
-        self._robot_instructions: list[list[int]] = list(list())
+        self._camera_feed: list[list[str]] = list()
+        self._robot_instructions: list[list[int]] = list()
         self._robot_output: int = 0
         self._mode: ASCII.Mode = ASCII.Mode.CAMERA
 
