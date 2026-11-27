@@ -1,6 +1,5 @@
 from __future__ import annotations
 from day10.Vector2D import Vector2D
-from day15.Droid import Path
 from day17.ASCII import Direction
 from enum import StrEnum
 from dataclasses import dataclass, field
@@ -23,12 +22,8 @@ class Tile(StrEnum):
         return tile.islower()
 
     @staticmethod
-    def is_poi(tile: str) -> bool:
-        return tile == Tile.ENTRANCE or Tile.is_key(tile)
-
-    @staticmethod
     def is_movable(tile: str) -> bool:
-        return tile == Tile.OPEN or Tile.is_door(tile) or Tile.is_poi(tile)
+        return tile in {Tile.OPEN, Tile.ENTRANCE} or Tile.is_door(tile) or Tile.is_key(tile)
 
     @staticmethod
     def key_to(door: str) -> str:
@@ -58,7 +53,7 @@ class State:
         return cls(keys)
 
     def __repr__(self) -> str:
-        return str(self.keys)
+        return str(tuple(self.keys))
 
     @property
     def length(self) -> int:
@@ -77,22 +72,27 @@ class State:
             other = State.of(other)
         return other.keys <= self.keys
 
-    def what_changed_from(self, other: State) -> str:
-        item, = self.keys - other.keys
-        return item
+    def what_changed_from(self, other: State) -> str | None:
+        difference = set(self.keys - other.keys)
+        return difference.pop() if difference else None
 
 
-class GridMap:
+class Vault:
     def __init__(self, gridmap: list[list[str]]) -> None:
         self._map: Final[list[list[str]]] = gridmap
-        self._poi_locations: dict[str, Vector2D] = dict()
-        self._find_poi_locations()
+        self._key_locations: dict[str, Vector2D] = dict()
+        self._entrance_location: Vector2D = Vector2D.zero()
+        self._adjacency_list: dict[str, dict[str, tuple[int, State]]] = dict()
+        self._find_entrance_and_keys()
+        # self._generate_adjacency_list()
 
-    def _find_poi_locations(self) -> None:
+    def _find_entrance_and_keys(self) -> None:
         for y, row in enumerate(self._map):
             for x, tile in enumerate(row):
-                if Tile.is_poi(tile):
-                    self._poi_locations[tile] = Vector2D(x, y)
+                if Tile.is_key(tile):
+                    self._key_locations[tile] = Vector2D(x, y)
+                elif tile == Tile.ENTRANCE:
+                    self._entrance_location = Vector2D(x, y)
 
     @property
     def _x_bound(self) -> int:
@@ -102,6 +102,14 @@ class GridMap:
     def _y_bound(self) -> int:
         return len(self._map)
 
+    @property
+    def keys(self) -> list[str]:
+        return list(self._key_locations.keys())
+
+    @property
+    def goal(self) -> State:
+        return State.of(self.keys)
+
     def _is_in_bounds(self, point: Vector2D) -> bool:
         return 0 <= point.x < self._x_bound and 0 <= point.y < self._y_bound
 
@@ -110,66 +118,54 @@ class GridMap:
             return ''
         return self._map[point.y][point.x]
 
-    def _get_movable_directions(self, point: Vector2D) -> list[Direction]:
-        return [direction for direction in Direction if Tile.is_movable(self._tile_at(point + direction.vector))]
+    def _location_of(self, item: str) -> Vector2D | None:
+        if item == Tile.ENTRANCE:
+            return self._entrance_location
+        else:
+            return self._key_locations.get(item, None)
 
-    def bfs(self) -> StateMap:
-        queue: deque[tuple[Vector2D, Path, State]] = deque()
+    def _get_movable_locations(self, point: Vector2D) -> list[Vector2D]:
+        return [neighbour for direction in Direction
+                if Tile.is_movable(self._tile_at(neighbour := point + direction.vector))]
+
+    def _bfs(self, start: str) -> None:
+        start_position = self._location_of(start)
+        if start_position is None:
+            return
+
+        queue: deque[tuple[Vector2D, int, State]] = deque()
         visited: set[Vector2D] = set()
-        paths_to_keys: dict[str, Path] = dict()
-        requirements_per_key: dict[str, State] = dict()
+        adjacent_keys: dict[str, tuple[int, State]] = dict()
 
-        queue.append((self._poi_locations[Tile.ENTRANCE], Path.empty(), State.empty()))
+        queue.append((start_position, 0, State.empty()))
 
         while queue:
-            position, path_from_start, doors_required = queue.popleft()
-            tile = self._tile_at(position)
-            if Tile.is_door(tile):
-                doors_required = doors_required.add_door(tile)
-            elif Tile.is_key(tile):
-                paths_to_keys[tile] = path_from_start
-                requirements_per_key[tile] = doors_required
+            position, distance, keys_required = queue.popleft()
             visited.add(position)
-            for direction in self._get_movable_directions(position):
-                next_position = position + direction.vector
-                next_path_from_start = path_from_start.add_step(direction)
+            tile = self._tile_at(position)
+            if Tile.is_key(tile) and tile != start:
+                adjacent_keys[tile] = (distance, keys_required)
+                continue
+            elif Tile.is_door(tile):
+                keys_required = keys_required.add_door(tile)
+            for next_position in self._get_movable_locations(position):
                 if next_position not in visited:
-                    queue.append((next_position, next_path_from_start, doors_required))
+                    queue.append((next_position, distance + 1, keys_required))
 
-        return StateMap(paths_to_keys, requirements_per_key)
+        self._adjacency_list[start] = adjacent_keys
 
-    def get_map(self) -> list[list[str]]:
-        return self._map
+    def _generate_adjacency_list(self) -> None:
+        for tile in [Tile.ENTRANCE] + self.keys:
+            self._bfs(tile)
 
-
-class StateMap:
-    def __init__(self, paths: dict[str, Path], requirements: dict[str, State]) -> None:
-        self._paths_to_keys: Final[dict[str, Path]] = paths
-        self._distance_between_keys: dict[frozenset[str], int] = dict()
-        self._requirements: Final[dict[str, State]] = requirements
-
-    @property
-    def keys(self) -> list[str]:
-        return list(self._requirements.keys())
-
-    @property
-    def goal(self) -> State:
-        return State.of(self.keys)
-
-    def _distance_between(self, key1: str, key2: str) -> int:
-        key_pair = frozenset((key1, key2))
-        if key_pair not in self._distance_between_keys:
-            path_to_key1 = self._paths_to_keys.get(key1, Path.empty())
-            path_to_key2 = self._paths_to_keys.get(key2, Path.empty())
-            self._distance_between_keys[key_pair] = (path_to_key1.reverse() + path_to_key2).length
-        return self._distance_between_keys[key_pair]
-
-    def _meets_requirement(self, state: State, key: str) -> bool:
-        requirement = self._requirements.get(key, State.empty())
-        return state.contains(requirement)
-
-    def _get_accessible_keys(self, state: State) -> list[str]:
-        return [key for key in self.keys if self._meets_requirement(state, key)]
+    def _get_accessible_keys(self, key: str, state: State) -> list[tuple[str, int]]:
+        if key not in self._adjacency_list:
+            self._bfs(key)
+        adjacent_keys = self._adjacency_list.get(key, None)
+        if adjacent_keys is None:
+            return list()
+        return [(key, distance) for key, (distance, keys_required) in adjacent_keys.items()
+                if state.contains(keys_required)]
 
     @dataclass(order=True)
     class QueueItem:
@@ -181,38 +177,54 @@ class StateMap:
         def items(self) -> tuple[int, str, State]:
             return self.distance, self.key, self.state
 
-    def dijkstra(self) -> tuple[dict[State, int], dict[State, State]]:
-        pqueue: list[StateMap.QueueItem] = list()
-        distances: dict[State, int] = dict()
-        predecessors: dict[State, State] = dict()
+    def dijkstra(self) -> ShortestPathsResult:
+        pqueue: list[Vault.QueueItem] = list()
+        distances: dict[tuple[str, State], int] = dict()
+        predecessors: dict[tuple[str, State], tuple[str, State]] = dict()
 
-        heapq.heappush(pqueue, StateMap.QueueItem(0, Tile.ENTRANCE, State.empty()))
-        distances[State.empty()] = 0
-        predecessors[State.empty()] = State.empty()
+        heapq.heappush(pqueue, Vault.QueueItem(0, Tile.ENTRANCE, State.empty()))
+        distances[(Tile.ENTRANCE, State.empty())] = 0
+        predecessors[(Tile.ENTRANCE, State.empty())] = (Tile.ENTRANCE, State.empty())
+        final_key_state = None
 
         while pqueue:
             distance, key, state = heapq.heappop(pqueue).items
-            if state == self.goal:
+            if state.contains(self.goal):
+                final_key_state = (key, state)
                 break
-            for next_key in self._get_accessible_keys(state):
+            for next_key, next_distance in self._get_accessible_keys(key, state):
                 next_state = state.add_key(next_key)
-                next_distance = distances[state] + self._distance_between(key, next_key)
-                if not state.contains(next_key):
-                    heapq.heappush(pqueue, StateMap.QueueItem(next_distance, next_key, next_state))
-                if next_distance < distances.get(next_state, inf):
-                    distances[next_state] = next_distance
-                    predecessors[next_state] = state
+                next_distance += distances.get((key, state), inf)
+                if next_distance < distances.get((next_key, next_state), inf):
+                    distances[(next_key, next_state)] = next_distance
+                    predecessors[(next_key, next_state)] = (key, state)
+                    heapq.heappush(pqueue, Vault.QueueItem(next_distance, next_key, next_state))
 
-        return distances, predecessors
+        return ShortestPathsResult(distances, predecessors, final_key_state)
 
-    def reconstruct_path(self, predecessors: dict[State, State]) -> list[str]:
+    def get_map(self) -> list[list[str]]:
+        return self._map
+
+
+@dataclass(frozen=True)
+class ShortestPathsResult:
+    distances: dict[tuple[str, State], int]
+    predecessors: dict[tuple[str, State], tuple[str, State]]
+    final_key_state: tuple[str, State]
+
+    @property
+    def distance(self) -> int:
+        return self.distances[self.final_key_state]
+
+    @property
+    def path(self) -> list[str]:
         path: list[str] = list()
-        curr_state, prev_state = self.goal, predecessors[self.goal]
-        while curr_state != prev_state:
+        curr_key_state, prev_key_state = self.final_key_state, self.predecessors[self.final_key_state]
+        while curr_key_state != prev_key_state:
+            _, curr_state = curr_key_state
+            _, prev_state = prev_key_state
             key = curr_state.what_changed_from(prev_state)
-            path.append(key)
-            curr_state, prev_state = prev_state, predecessors[prev_state]
+            if key is not None:
+                path.append(key)
+            curr_key_state, prev_key_state = prev_key_state, self.predecessors[prev_key_state]
         return path[::-1]
-
-    def get_requirements(self) -> dict[str, State]:
-        return self._requirements
