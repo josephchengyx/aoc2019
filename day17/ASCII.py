@@ -248,18 +248,18 @@ class Pathfinder:
 
         def extract_main_routine(functions: list[list[str]], assignment: list[int]) -> str:
             main_routine = list()
-            current_function = -1
+            current_function = None
             current_length = 0
             for function_number in assignment:
                 function_number -= 1
-                if current_function == -1:
+                if current_function is None:
                     current_function = function_number
                 if function_number != current_function or current_length > len(functions[current_function]):
                     main_routine.append(Pathfinder._function_names[current_function])
                     current_function = function_number
                     current_length = 0
                 current_length += 1
-            if current_function != -1:
+            if current_function is not None:
                 main_routine.append(Pathfinder._function_names[current_function])
             return Pathfinder.format_instruction(main_routine)
 
